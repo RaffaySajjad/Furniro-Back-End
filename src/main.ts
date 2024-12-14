@@ -5,7 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*',
+    origin: 'https://furniro-front-end.vercel.app',
     methods: 'GET,POST, DELETE, PUT, PATCH',
     credentials: true,
   });
