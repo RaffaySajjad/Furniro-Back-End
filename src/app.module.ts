@@ -10,7 +10,9 @@ import { UserModule } from './users/users.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot('mongodb://localhost/test'),
+    MongooseModule.forRoot(
+      'mongodb+srv://admin:test123456@furniro.hlmjx.mongodb.net/?retryWrites=true&w=majority&appName=Furniro',
+    ),
     UserModule,
     ProductModel,
     AuthModule,
