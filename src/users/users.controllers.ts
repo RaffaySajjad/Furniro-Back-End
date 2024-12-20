@@ -66,6 +66,13 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Admin, Role.User)
+  @Delete('clearCart/:userEmail')
+  async deleteCart(@Param('userEmail') userEmail: string) {
+    this.userService.clearUserCart(userEmail);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin, Role.User)
   @Delete('removeFavorite/:userEmail/:productId')
   async removeFromFavorites(
     @Param('userEmail') userEmail: string,

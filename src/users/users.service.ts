@@ -35,6 +35,15 @@ export class UserService {
 
     return user.cart;
   }
+  async clearUserCart(email: string): Promise<CartItem[]> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.cart = [];
+    await user.save();
+    return user.cart;
+  }
   async updateUserCart(userEmail: string, userCartDTO: UserCartDTO) {
     const user = await this.userModel.findOne({ email: userEmail });
     if (!user) {
