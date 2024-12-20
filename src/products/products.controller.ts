@@ -17,11 +17,16 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateProductDTO } from 'src/dto/updateProduct.dto';
+import { UserService } from 'src/users/users.service';
 import { CreateProductDTO } from '../dto/createProduct.dto';
 import { ProductService } from './products.service';
+
 @Controller()
 export class ProductController {
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private userService: UserService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Admin)
@@ -55,8 +60,22 @@ export class ProductController {
   async deleteProduct(@Param('id') id: string) {
     const isValid = mongoose.Types.ObjectId.isValid(id);
     if (!isValid) throw new HttpException('Product not found', 404);
-    return this.productService.deleteProduct(id);
+
+    await this.productService.deleteProduct(id);
+
+    const users = await this.userService.getAllUsers();
+
+    for (const user of users) {
+      if (user.cart && user.cart.length > 0) {
+        await this.userService.removeProductFromCart(user.email, id);
+      }
+    }
+
+    return {
+      message: "Product deleted and removed from all users' carts successfully",
+    };
   }
+
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Admin)
   @Put('updateProduct/:id')
@@ -70,6 +89,7 @@ export class ProductController {
 
     return this.productService.updateProduct(id, updateProductDTO);
   }
+
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Admin)
   @Get('getAllProducts')

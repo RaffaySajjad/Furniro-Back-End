@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -64,9 +65,34 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin, Role.User)
+  @Delete('removeFavorite/:userEmail/:productId')
+  async removeFromFavorites(
+    @Param('userEmail') userEmail: string,
+    @Param('productId') productId: string,
+  ) {
+    this.userService.removeFromFavorites(userEmail, productId);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.Admin)
   @Get('getAllUsers')
   getUsers() {
     return this.userService.getAllUsers();
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Get('userDetails')
+  async getUserDetails(@Query('email') email: string) {
+    return this.userService.userDetails(email);
+  }
+
+  @Post('addFavorite/:email/:productId')
+  async addFavorite(
+    @Param('email') email: string,
+    @Param('productId') productId: string,
+  ) {
+    return await this.userService.addFavorites(email, productId);
   }
 }

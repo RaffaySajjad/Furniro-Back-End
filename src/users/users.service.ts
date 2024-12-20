@@ -57,6 +57,18 @@ export class UserService {
     await user.save();
     return user;
   }
+  async removeFromFavorites(userEmail: string, productId: string) {
+    const user = await this.userModel.findOne({ email: userEmail });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const result = await this.userModel.updateOne(
+      { email: userEmail },
+      { $pull: { favorites: { _id: productId } } },
+    );
+    return { message: 'Product removed from favorites' };
+  }
   async removeProductFromCart(
     userEmail: string,
     productId: string,
@@ -80,5 +92,21 @@ export class UserService {
   }
   async getAllUsers() {
     return this.userModel.find();
+  }
+  async addFavorites(userEmail: string, productId) {
+    const user = await this.userModel.findOne({ email: userEmail });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.favorites.push(productId);
+    await user.save();
+    return user;
+  }
+  async userDetails(userEmail: string) {
+    const user = await this.userModel.findOne({ email: userEmail });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
   }
 }

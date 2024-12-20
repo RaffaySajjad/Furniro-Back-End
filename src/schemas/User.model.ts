@@ -25,6 +25,9 @@ export class User {
     default: [Role.User],
   })
   role: Role[];
+
+  @Prop({ type: [{ id: String }], required: false })
+  favorites: String[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
