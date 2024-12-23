@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { UserCartDTO } from 'src/dto/userCart.dto';
 import { User } from 'src/schemas/User.model';
 import { CreateUserDTO } from '../auth/dto/createUser.dto';
@@ -117,5 +117,10 @@ export class UserService {
       throw new Error('User not found');
     }
     return user;
+  }
+  deleteUser(id: string) {
+    const isValid = mongoose.Types.ObjectId.isValid(id);
+    if (!isValid) throw new HttpException('User not found', 404);
+    return this.userModel.findByIdAndDelete(id);
   }
 }

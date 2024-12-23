@@ -95,6 +95,13 @@ export class UserController {
     return this.userService.userDetails(email);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin)
+  @Delete('deleteUser/:id')
+  deleteUser(@Param('id') id: string) {
+    return this.userService.deleteUser(id);
+  }
+
   @Post('addFavorite/:email/:productId')
   async addFavorite(
     @Param('email') email: string,
