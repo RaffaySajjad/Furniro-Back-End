@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Put,
   Post,
   Query,
   UseGuards,
@@ -17,6 +18,7 @@ import { Role } from 'src/auth/enums/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserCartDTO } from 'src/dto/userCart.dto';
 import { CartItem, UserService } from './users.service';
+import { UpdateUserDTO } from 'src/auth/dto/updateUser.dto';
 @Controller()
 export class UserController {
   constructor(private userService: UserService) {}
@@ -100,6 +102,16 @@ export class UserController {
   @Delete('deleteUser/:id')
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.Admin, Role.User)
+  @Put('updateUser/:email')
+  async updateUser(
+    @Param('email') email: string,
+    @Body() updateUserDTO: UpdateUserDTO,
+  ) {
+    return await this.userService.updateUserDetails(email, updateUserDTO);
   }
 
   @Post('addFavorite/:email/:productId')

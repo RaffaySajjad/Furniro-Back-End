@@ -5,6 +5,7 @@ import mongoose, { Model } from 'mongoose';
 import { UserCartDTO } from 'src/dto/userCart.dto';
 import { User } from 'src/schemas/User.model';
 import { CreateUserDTO } from '../auth/dto/createUser.dto';
+import { UpdateUserDTO } from 'src/auth/dto/updateUser.dto';
 
 export interface CartItem {
   id: string;
@@ -122,5 +123,33 @@ export class UserService {
     const isValid = mongoose.Types.ObjectId.isValid(id);
     if (!isValid) throw new HttpException('User not found', 404);
     return this.userModel.findByIdAndDelete(id);
+  }
+  async updateUserDetails(userEmail: string, updateUserDTO: UpdateUserDTO) {
+    const user = await this.userModel.findOne({ email: userEmail });
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
+
+    const { name, email, password } = updateUserDTO;
+
+    if (name) {
+      user.name = name;
+    }
+
+    if (email) {
+      const existingEmail = await this.userModel.findOne({ email });
+      if (existingEmail && existingEmail.email !== user.email) {
+        throw new HttpException('Email is already in use', 400);
+      }
+      user.email = email;
+    }
+
+    if (password) {
+      user.password = await bcrypt.hash(password, 12);
+    }
+
+    await user.save();
+
+    return user;
   }
 }

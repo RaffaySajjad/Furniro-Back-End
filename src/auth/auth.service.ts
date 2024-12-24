@@ -26,7 +26,11 @@ export class AuthService {
       role,
     });
 
-    const token = this.jwtService.sign({ id: user._id, role: user.role });
+    const token = this.jwtService.sign({
+      id: user._id,
+      role: user.role,
+      loggedEmail: user.email,
+    });
 
     return { token };
   }
@@ -40,23 +44,32 @@ export class AuthService {
     if (!isPasswordMatched) {
       throw new UnauthorizedException('Invalid Credentials');
     }
-    const token = this.jwtService.sign({ id: user._id, role: user.role });
+    const token = this.jwtService.sign({
+      id: user._id,
+      role: user.role,
+      loggedEmail: user.email,
+    });
 
     return { token };
   }
   async decodeToken(token: string): Promise<UserToken> {
     try {
-      const decodedToken = this.jwtService.decode(token);
+      const decodedToken = this.jwtService.verify(token);
       if (!decodedToken || !decodedToken.id) {
         throw new UnauthorizedException('Invalid token');
       }
+
       const user: UserToken = await this.userModel.findById(decodedToken.id);
 
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
+
       return user;
     } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token expired');
+      }
       throw new UnauthorizedException('Invalid token');
     }
   }
